@@ -1,5 +1,7 @@
 #Use Debian Bookworm as base
-FROM --platform=linux/aarch64 debian:bookworm-slim
+#FROM --platform=linux/aarch64 debian:bookworm-slim
+FROM --platform=$BUILDPLATFORM debian:bookworm-slim
+
 
 #Choose Python 3.10 
 FROM python:3.10-slim
@@ -20,4 +22,4 @@ COPY . ./
 ENV UDEV=1
 
 # object-detection will run when container starts up on the UNO Q device
-CMD ["python","-u","src/object-detection.py"]
+CMD ["python","-u","src/object-detection-yolov10.py"]

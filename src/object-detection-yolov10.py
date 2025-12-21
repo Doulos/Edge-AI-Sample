@@ -1,3 +1,4 @@
+import sys
 import time
 import cv2
 import paho.mqtt.client as mqtt
@@ -13,7 +14,8 @@ broker_address = "test.mosquitto.org"
 client = mqtt.Client()
 
 #Connect to broker. Broker can be located on edge or cloud
-client.connect(broker_address)
+client.connect(broker_address, 1883, 60)
+
 
 # Function to load labels from a file
 def load_labels(file_path):
@@ -31,16 +33,18 @@ def detect_from_image():
     #        sys.exit('ERROR: Unable to read from webcam. Please verify your webcam settings.')
 
     # prepare input image
-    start = time.time()
     img = cv2.cvtColor(img_org, cv2.COLOR_BGR2RGB)
     img = cv2.resize(img, (640, 640))
-    img = img.reshape(1, img.shape[0], img.shape[1],
-                      img.shape[2])  # (1, 640, 640, 3)
-    img = img.astype(np.uint8)
+    input_tensor = np.asarray(img, dtype=np.float32)
 
-    # Overview of Object Detection: https://www.tensorflow.org/lite/examples/object_detection/overview
+    # Normalize pixel values to be between 0 and 1.0
+    input_tensor /= 255.0
+
+    # Add batch dimension (1, 640, 640, 3) as expected by the TFLite model
+    input_tensor = np.expand_dims(input_tensor, axis=0)
+
+    # Overview of Object Detection - YOLOv10 model: https://docs.ultralytics.com/models/yolov10/
    
-
     interpreter = Interpreter(
         model_path="src/yolov10n_float16.tflite")
 
@@ -49,26 +53,19 @@ def detect_from_image():
     output_details = interpreter.get_output_details()
 
     # set input tensor
-    interpreter.set_tensor(input_details[0]['index'], img)
+    interpreter.set_tensor(input_details[0]['index'], input_tensor)
 
     # execute model graph using LiteRT
     interpreter.invoke()
 
     output_data = interpreter.get_tensor(output_details[0]['index'])
+    
     first_detection = output_data[0,0]
     
+    # get output tensor details for first detection [0]
     x, y, w, h, confidence, class_id = first_detection
 
-    # get output tensor details
-    '''boxes = interpreter.get_tensor(output_details[0]['index'])
-    boxes_shape = output_details[0]['shape_signature']
-    labels = interpreter.get_tensor(output_details[1]['index'])
-    scores = interpreter.get_tensor(output_details[2]['index'])
-    num = interpreter.get_tensor(output_details[3]['index'])
-    labels_list = labels.tolist()
-    boxes = np.array(boxes, dtype=np.float32)''' 
-    
-    output_detection = str(f' "Label:", {label2string[class_id]]}, ",Score:", {confidence} ",Bounding box coodinates: (x,y,w,h" , {x,y,w,h}')
+    output_detection = str(f' "Label:", {class_id}, {label2string[class_id]}, ",Score:", {confidence} ", Image coordinates:", {x,y,w,h}' )
 
     return output_detection
 
@@ -83,6 +80,9 @@ if __name__ == '__main__':
     client.loop_start()
     publish_inference()
     time.sleep(5)
-    # Keep the client connected and processing messages
-    client.loop_forever()
+    publish_inference()
+    client.disconnect()
+    client.loop_stop()
+    print("MQTT client disconnected and loop stopped.")
+    sys.exit(0) # Exit the Python program    
 

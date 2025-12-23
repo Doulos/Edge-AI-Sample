@@ -145,8 +145,6 @@ def detect_from_image():
                                     ]
             }
 
-    #output_detection = str(f' "Label:", {class_id}, {label2string[class_id]}, ",Score:", {confidence} ", Image coordinates:", {x,y,w,h}' )
-
     return det_info
 
 

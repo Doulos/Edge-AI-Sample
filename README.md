@@ -7,10 +7,10 @@ Doulos course on [Edge AI for Embedded Developers](https://www.doulos.com/traini
 Clone the repository on either Raspberry Pi 3, 4 or 5
 
 ```bash
-$git clone https://github.com/Rahuldee18//RPi-YOLOv10
+$git clone https://github.com/Doulos/Edge-AI-Sample
 
 ```
-Cloning will create a new folder called RPi-YOLOv10.
+Cloning will create a new folder called Edge-AI-Sample
 
 Change directory to this newly created folder. 
 
@@ -29,7 +29,7 @@ $ sudo usermod -aG docker $USER
 Create Docker image using build.
 
 - The image is built locally on Raspberry Pi -3B and takes about 3-4 minutes.
-- Change to the RPi-YOLOv10 directory and issue the build command.
+- Change to the Edge-AI-Sample directory and issue the build command.
 
 ```bash
 $sudo docker build -t yolov10-mqtt .
@@ -62,7 +62,7 @@ Observe the output from the application.
 
 ```bash
 [3] 37984
-pi@raspberrypi:~/RPi-YOLOv10$ INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+pi@raspberrypi:~/Edge-AI-Sample$ INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
 Sending JSON: {"timestamp": 1766459874.8768485, "objects": {"class_id": 0, "label": "person", "confidence": 0.793, "bbox": [0.09138107299804688, 0.07930111885070801, 0.6551454067230225, 0.9981493949890137]}}
 Inference published to MQTT topic
 Logged to DB: person
